@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enviar Mensaje</title>
+    <!-- Incluye Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .container {
+            margin-top: 50px;
+        }
+        .table-responsive {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1 class="text-center">Enviar Mensaje</h1>
+    <form id="messageForm">
+        <div class="form-group">
+            <label for="messageContent">Contenido del Mensaje</label>
+            <textarea class="form-control" id="messageContent" rows="4" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Enviar</button>
+    </form>
+    <div class="table-responsive mt-4" id="response">
+        <!-- La respuesta será insertada aquí en formato de tabla -->
+    </div>
+</div>
+
+<!-- Incluye jQuery y Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+    document.getElementById('messageForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // Evita que el formulario se envíe de forma tradicional
+
+        const messageContent = document.getElementById('messageContent').value;
+        fetch('/api', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(messageContent), // Enviar JSON con contenido del mensaje
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Construir la tabla para mostrar la respuesta y quién atendió la solicitud
+            let responseTable = `
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Campo</th>
+                            <th>Valor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Atendido por</td>
+                            <td>${data.handledBy}</td>
+                        </tr>
+                        <tr>
+                            <td>Respuesta</td>
+                            <td><pre>${JSON.stringify(data.response, null, 2)}</pre></td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+            document.getElementById('response').innerHTML = responseTable;
+        })
+        .catch(error => {
+            document.getElementById('response').innerHTML = '<p class="text-danger">Error: ' + error.message + '</p>';
+        });
+    });
+</script>
+</body>
+</html>
